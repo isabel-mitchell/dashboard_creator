@@ -1,7 +1,6 @@
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
         saveLayoutTest: function(saveButClicks, appBody, dataStore) {
-
             let elements = []
             if (!saveButClicks) {
                 return ""
@@ -35,14 +34,32 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 return elements
             }
         }
-
     }
 })
+
 
 window.onload = (event) => {
     console.log('page is fully loaded');
 
     setTimeout(function(){
+
+        // setting up draggable / resizable for new elements added 
+        const config = {attributes: false, childList: true, subtree: false};
+        const draggableCallback= function(mutationList, observer) {
+            for (const mutation of mutationList){
+                if (mutation.type === 'childList') {
+                    $(".draggable").draggable();
+                    $(".draggable").resizable();
+                    $(".draggable").addClass('absolute');
+                }
+            }
+
+        }
+
+        const observer = new MutationObserver(draggableCallback)
+        observer.observe(document.getElementById('body'), config)
+
+        // draggable and resizable for existing elements
         $(".draggable").draggable();
         $(".draggable").resizable();
         $(".draggable").addClass('absolute');
@@ -59,5 +76,5 @@ window.onload = (event) => {
             $(this).css('top',`${$(this)[0]['offsetTop'] / window.innerHeight * 100}%`)
         })
 
-    }, 500);
+    }, 1000);
 };

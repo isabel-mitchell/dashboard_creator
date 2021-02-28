@@ -42,21 +42,22 @@ def createGraph(element, data_dict):
                 y=data_dict[element['data']['df']][element['data']['y']],
                 marker_color=element['data']['marker_color']
             )
-        ]
+        ],
+        layout=element["layout"]
     )
 
     return html.Div(
         id=element['id'], 
         className='draggable graph', 
         style={
-            'border': '1px black solid',
+            #'border': '1px black solid',
             'position': 'absolute',
             'top': element['top'],
             'left': element['left'],
             'height': element['height'],
             'width': element['width']
         }, 
-        children=dcc.Graph(figure=fig, style={'height': '100%', 'width': '100%'})
+        children=dcc.Graph(figure=fig, style={'height': '100%', 'width': '100%', 'border': '1px black solid'})
     )
 
 def createElement(element, element_key, data_dict):
