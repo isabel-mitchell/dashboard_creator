@@ -57,7 +57,21 @@ def createGraph(element, data_dict):
             'height': element['height'],
             'width': element['width']
         }, 
-        children=dcc.Graph(figure=fig, style={'height': '100%', 'width': '100%', 'border': '1px black solid'})
+        children=[
+            html.Div([
+                html.I(
+                    id={'action':'edit', 'input_id':element['id']},
+                    className="fas fa-pencil-alt m-2 h3",
+                    style={'cursor':'pointer'}
+                ),
+                html.I(
+                    id={'action':'delete', 'input_id':element['id']},
+                    className="fas fa-trash-alt m-2 h3",
+                    style={'cursor':'pointer'}
+                )
+            ], style={'position':'absolute', 'right':0, 'zIndex':10}),
+            dcc.Graph(figure=fig, style={'height': '100%', 'width': '100%', 'border': '1px black solid'})
+        ]
     )
 
 def createElement(element, element_key, data_dict):

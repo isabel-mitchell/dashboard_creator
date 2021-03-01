@@ -29,7 +29,7 @@ element_key = {
 ###############################################################################################################
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', dbc.themes.BOOTSTRAP, "https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"]
-external_scripts = ["https://code.jquery.com/jquery-1.12.4.js", "https://code.jquery.com/ui/1.12.1/jquery-ui.js"]
+external_scripts = ["https://code.jquery.com/jquery-1.12.4.js", "https://code.jquery.com/ui/1.12.1/jquery-ui.js", "https://kit.fontawesome.com/5d748364e5.js"]
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets, external_scripts = external_scripts)#, suppress_callback_exceptions=True)
 
@@ -94,7 +94,8 @@ def get_input_trigger_id(ctx):
     [Output('body', 'children'), Output('data-store', 'data')],
     [
         Input('memory', 'data'),
-        Input('add-button', 'n_clicks')
+        Input('add-button', 'n_clicks'),
+        Input({'action':'delete', 'input_id':ALL},'n_clicks')
     ],
     [
         State({'id':ALL, 'plot': ALL, 'type':'modal'}, 'figure'),
@@ -105,11 +106,13 @@ def get_input_trigger_id(ctx):
     ]
 )
 def update_body(
-    stored_data, add_button_n_clicks, modal_plot, body, 
-    current_stored_data, dataframe_selection, data_inputs
+    stored_data, add_button_n_clicks, delete_n_clicks,
+    modal_plot, body, current_stored_data, dataframe_selection, 
+    data_inputs
 ):
 
     input_trigger = get_input_trigger_id(dash.callback_context)
+    print(input_trigger)
 
     if input_trigger == 'X':
         return dash.no_update, dash.no_update
@@ -137,11 +140,24 @@ def update_body(
         body.append(html.Div(
             id=f'test-graph{len(current_stored_data) + 1}',
             className='draggable graph', 
-            children=dcc.Graph(figure=modal_plot[0], style={'height': '100%', 'width': '100%'})
-            )
+            children=[
+                html.Div([
+                    html.I(
+                        id={'action':'edit', 'input_id':f'test-graph{len(current_stored_data) + 3}'},
+                        className="fas fa-pencil-alt m-2 h3",
+                        style={'cursor':'pointer'}
+                    ),
+                    html.I(
+                        id={'action':'delete', 'input_id':f'test-graph{len(current_stored_data) + 3}'},
+                        className="fas fa-trash-alt m-2 h3",
+                        style={'cursor':'pointer'}
+                    )
+                ], style={'position':'absolute', 'right':0, 'zIndex':10}),
+            dcc.Graph(figure=modal_plot[0], style={'height': '100%', 'width': '100%'})
+            ])
         )
 
-        current_stored_data[f'test-graph{len(current_stored_data) + 1}'] = {
+        current_stored_data[f'test-graph{len(current_stored_data) + 3}'] = {
             'df': dataframe_selection[0],
             'x': data_inputs[0],
             'y': data_inputs[1],
@@ -150,8 +166,18 @@ def update_body(
 
         return body, current_stored_data
 
-    else:
+    elif input_trigger == 'add-button' and add_button_n_clicks == 0:
         return dash.no_update, dash.no_update
+
+    else:
+        input_trigger = json.loads(input_trigger)
+        trigger_action, trigger_id = input_trigger['action'], input_trigger['input_id']
+
+        if trigger_action == 'delete':
+            body = [element for element in body if element['props']['id'] != trigger_id]
+            return body, dash.no_update
+        else:
+            return dash.no_update, dash.no_update
 
 
 
